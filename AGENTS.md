@@ -24,8 +24,9 @@ pnpm build
 pnpm check-types            # src/api/types.ts against shop-api's api/openapi.yaml
 ```
 
-Run `lint`, `typecheck`, `test` and `build` before you hand in a change; CI runs
-the same plus `check-types`.
+Run `lint`, `typecheck`, `test` and `build` before you hand in a change, and
+`check-types` when you touch `src/api/types.ts`. There is no CI workflow in this
+repository.
 
 ## Layout and where logic goes
 
