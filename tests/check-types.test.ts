@@ -65,13 +65,22 @@ describe('check-types', () => {
     expect(compareTypes(schemaFields(SPEC), typeFields(complete))).toEqual([])
   })
 
-  it('reads the fields of the real src/api/types.ts', () => {
+  it('reads interfaces with their fields from inline source', () => {
+    const types = typeFields(`
+      export interface Cart { items: string[]; total_cents: number }
+      export type Tagged = { id: number; 'odd-key': string }
+    `)
+
+    expect(types.get('Cart')).toEqual(new Set(['items', 'total_cents']))
+    expect(types.get('Tagged')).toEqual(new Set(['id', 'odd-key']))
+  })
+
+  it('parses the real src/api/types.ts and finds the types the app is built on', () => {
     const types = typeFields(readFileSync('src/api/types.ts', 'utf8'))
 
-    expect(types.get('Cart')).toEqual(
-      new Set(['items', 'coupon', 'currency', 'subtotal_cents', 'discount_cents', 'total_cents']),
-    )
-    expect(types.get('Order')?.has('discount_cents')).toBe(false)
+    expect(types.get('Cart')?.has('total_cents')).toBe(true)
+    expect(types.get('Order')?.has('id')).toBe(true)
+    expect(types.get('Order')?.has('total_cents')).toBe(true)
   })
 
   it('uses the PR branch, then the pushed branch', () => {

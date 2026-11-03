@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   ApiError,
   applyCoupon,
+  login,
   getAccessToken,
   getCart,
   listOrders,
@@ -112,6 +113,20 @@ describe('api client', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2)
     expect(getAccessToken()).toBeNull()
     expect(listener).toHaveBeenLastCalledWith(null)
+  })
+
+  it('does not refresh when a sign-in attempt is refused', async () => {
+    fetchMock.mockResolvedValueOnce(
+      json(401, { error: { code: 'invalid_credentials', message: 'Wrong email or password.' } }),
+    )
+
+    await expect(login('demo@shop.test', 'wrong')).rejects.toMatchObject({
+      status: 401,
+      code: 'invalid_credentials',
+    })
+
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(fetchMock.mock.calls[0]?.[0]).toBe('/auth/login')
   })
 
   it('maps the API error body to ApiError', async () => {
